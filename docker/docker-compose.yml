@@ -1,0 +1,109 @@
+version: "3.1"
+
+services:
+  # docker run -d --name postgresDB -p 5432:5432
+  # -e POSTGRES_DB=mytodo -e POSTGRES_PASSWORD=12345678
+  # -e PGDATA=/var/lib/postgresql/data/pgdata
+  # -v D:\workspace\cpe497\postgres-data:/var/lib/postgresql/data
+  # postgres:15-alpine
+
+  postgresdb:
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=mytodo
+      - POSTGRES_PASSWORD=12345678
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  # Database admin panel
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  # docker run -d -p 9000:9000 -p 9090:9090 --name minio
+  # -v D:\workspace\cpe497\minio-data:/data
+  # -e "MINIO_ROOT_USER=root" -e "MINIO_ROOT_PASSWORD=12345678"
+  # quay.io/minio/minio server /data --console-address ":9090"
+
+  # starts 2 docker containers running minio server instances.
+  # using nginx reverse proxy, load balancing, you can access
+  # it through port 9000.
+  minio1:
+    image: quay.io/minio/minio:RELEASE.2023-09-07T02-05-02Z
+    command: server --console-address ":9001" http://minio{1...2}/data{1...2}
+    expose:
+      - "9000"
+      - "9001"
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=12345678
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    hostname: minio1
+    volumes:
+      - data1-1:/data1
+      - data1-2:/data2
+
+  minio2:
+    image: quay.io/minio/minio:RELEASE.2023-09-07T02-05-02Z
+    command: server --console-address ":9001" http://minio{1...2}/data{1...2}
+    expose:
+      - "9000"
+      - "9001"
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=12345678
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    hostname: minio2
+    volumes:
+      - data2-1:/data1
+      - data2-2:/data2
+
+  nginx:
+    image: nginx:1.19.2-alpine
+    hostname: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    depends_on:
+      - minio1
+      - minio2
+
+  # todolist:
+  #   image: todo-postgres-minio
+  #   restart: always
+  #   ports:
+  #     - 3000:3000
+  #   environment:
+  #     # - DATABASE_URL=postgresql://postgres:12345678@localhost:5432/mytodo
+  #     - DATABASE_URL=postgresql://postgres:12345678@postgresdb:5432/mytodo
+  #     - JWT_SECRET=PRISMA-MINIO-497
+  #     - OBJ_STORAGE_ENDPOINT=localhost
+  #     - OBJ_STORAGE_PORT=9000
+  #     - OBJ_ACCESS_KEY=UVXO9PimYMnW4bQB886b
+  #     - OBJ_SECRET_KEY=2ooqppyZRMMVgZopmgcMUk8wD9jeHenCyA0056QX
+  #     - OBJ_BUCKET=todo-app
+
+## By default this config uses default local driver,
+## For custom volumes replace with volume driver configuration.
+volumes:
+  data1-1:
+  data1-2:
+  data2-1:
+  data2-2:
+  postgres-data:

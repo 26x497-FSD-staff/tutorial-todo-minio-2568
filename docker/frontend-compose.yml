@@ -1,0 +1,48 @@
+version: "3.8"
+
+# docker run -dp 3000:3000 --name dome-todo
+# --env-file env.list
+# --network="docker_default"
+#
+# --cpus="1.5" (at most 1.5 of CPUs out of n-CPU)
+# --cpuset-cpus=1,3 (use the 2nd and 4th CPU)
+# --memory="512m" --memory-swap="1g" --memory-reservation="450m"
+# --gpus all (access all GPUs)
+#
+# potikanond/dome-todo
+
+services:
+  dome-todo:
+    image: potikanond/dome-todo-photo
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      # - DATABASE_URL=postgresql://postgres:12345678@localhost:5432/mytodo
+      - DATABASE_URL=postgresql://postgres:12345678@postgresdb:5432/mytodo
+      - JWT_SECRET=PRISMA-MINIO-497
+      - OBJ_STORAGE_ADDR=${MINIO_ADDR}
+      - OBJ_STORAGE_PORT=9000
+      - OBJ_ACCESS_KEY=Bd7RcGe3t5Ozf50rCNrQ
+      - OBJ_SECRET_KEY=TZCVUMFHifEY76qbYPPRqbU20HQGxwrfoABID4nj
+      - OBJ_BUCKET=todo-app
+
+    # networks:
+    #   - custom_network
+
+    deploy:
+      # model: replicated # or global (one container/node)
+      # replicas: 2
+      # placement:
+      #   max_replicas_per_node: 2
+
+      resources:
+        limits:
+          cpus: "1" # --cpus
+          memory: 512M # --memory
+        reservations:
+          cpus: "0.75" # --cpu-reservation
+          memory: 470M # --memory-reservation
+
+networks:
+  default:

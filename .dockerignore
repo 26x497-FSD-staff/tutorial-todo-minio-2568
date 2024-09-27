@@ -1,0 +1,14 @@
+node_modules
+Dockerfile*
+docker/
+.git
+.gitignore
+README.md
+LICENSE
+.vscode
+.next
+*.swp
+/scripts
+*.log
+.env
+env*
