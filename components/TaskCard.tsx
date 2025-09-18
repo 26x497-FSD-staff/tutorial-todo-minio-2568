@@ -1,12 +1,12 @@
 import {
   GetTaskFileErrorResponse,
   GetTaskFileOKResponse,
-} from "@/app/api/task/file/route";
+} from "@/app/api/tasks/file/route";
 import {
   DeleteTaskBody,
   DeleteTaskErrorResponse,
   DeleteTaskOKResponse,
-} from "@/app/api/task/route";
+} from "@/app/api/tasks/route";
 import { Button, Group, Paper, Text, Modal, Image } from "@mantine/core";
 import { Task } from "@prisma/client";
 import axios from "axios";
@@ -20,12 +20,13 @@ type Props = Pick<Task, "title" | "id" | "fileName"> & {
 
 export const TaskCard: FC<Props> = ({ title, id, fileName, refetchTasks }) => {
   const [url, setUrl] = useState("");
+  const [isPhoto, setIsPhoto] = useState(true);
   const [opened, setOpened] = useState(false);
   // const [opened, { open, close }] = useDisclosure(false);
 
   async function callDeleteTask() {
     try {
-      axios.delete<{}, DeleteTaskOKResponse, DeleteTaskBody>("/api/task", {
+      axios.delete<{}, DeleteTaskOKResponse, DeleteTaskBody>("/api/tasks", {
         data: { id },
       });
       refetchTasks();
@@ -37,15 +38,31 @@ export const TaskCard: FC<Props> = ({ title, id, fileName, refetchTasks }) => {
     }
   }
 
+  const openNewTab = (url: string) => {
+    window.open(url, '_blank', 'noreferrer');
+  };
+
   async function callGetTaskFile() {
     try {
       const response = await axios.get<GetTaskFileOKResponse>(
-        `/api/task/file?taskId=${id}`
+        `/api/tasks/file?taskId=${id}`
       );
 
-      console.log(response.data.url);
+      // console.log(response.data.url);
+      // console.log(response.data.isPhoto);
+
       setUrl(response.data.url);
-      setOpened(true);
+      setIsPhoto(response.data.isPhoto);
+
+
+      if (isPhoto)
+        setOpened(true);
+      else {
+        setOpened(false);
+        openNewTab(url);
+      }
+
+
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         const data = err.response?.data as GetTaskFileErrorResponse;
@@ -58,6 +75,7 @@ export const TaskCard: FC<Props> = ({ title, id, fileName, refetchTasks }) => {
     <Paper withBorder my="xs" p="md">
       <Group position="apart">
         <Text>{title}</Text>
+
         <Modal
           size="65%"
           opened={opened}
@@ -66,6 +84,7 @@ export const TaskCard: FC<Props> = ({ title, id, fileName, refetchTasks }) => {
         >
           <Image radius="md" src={url} />
         </Modal>
+
         <Group>
           {fileName && (
             <Button color="gray" variant="outline" onClick={callGetTaskFile}>

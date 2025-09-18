@@ -1,4 +1,4 @@
-import { AddTaskErrorResponse, AddTaskOKResponse } from "@/app/api/task/route";
+import { AddTaskErrorResponse, AddTaskOKResponse } from "@/app/api/tasks/route";
 import { Button, FileInput, Flex, Paper, TextInput } from "@mantine/core";
 import axios from "axios";
 import { FC, useState } from "react";
@@ -24,7 +24,7 @@ export const NewTaskSection: FC<Props> = ({ refetchTasks }) => {
     try {
       setLoading(true);
       const result = await axios.post<{}, AddTaskOKResponse, FormData>(
-        "/api/task",
+        "/api/tasks",
         formData
       );
       setTitle("");
@@ -53,7 +53,7 @@ export const NewTaskSection: FC<Props> = ({ refetchTasks }) => {
           label="Image (optional)"
           placeholder="Attach Image.."
           w="150px"
-          accept="image/*"
+          // accept="image/*"
           value={file}
           onChange={setFile}
           clearable

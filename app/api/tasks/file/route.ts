@@ -3,7 +3,7 @@ import { getMinio } from "@/libs/getMinio";
 import { getPrisma } from "@/libs/getPrisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export type GetTaskFileOKResponse = { ok: true; url: string };
+export type GetTaskFileOKResponse = { ok: true; url: string; isPhoto: boolean };
 export type GetTaskFileErrorResponse = { ok: false; message: string };
 
 export async function GET(req: NextRequest) {
@@ -40,8 +40,12 @@ export async function GET(req: NextRequest) {
       5 * 60
     );
 
-    console.log("\n" + url + "\n");
-    return NextResponse.json<GetTaskFileOKResponse>({ ok: true, url });
+    const isPhoto = task.fileName?.endsWith('.pdf')? false:true;
+
+    // console.log("\n" + url + "\n");
+    // console.log(isPhoto);
+
+    return NextResponse.json<GetTaskFileOKResponse>({ ok: true, url, isPhoto });
   } catch {
     return NextResponse.json<GetTaskFileErrorResponse>(
       {

@@ -1,5 +1,5 @@
 "use client";
-import { GetTasksResponse } from "@/app/api/task/route";
+import { GetTasksResponse } from "@/app/api/tasks/route";
 import { NewTaskSection } from "@/components/NewTaskSection";
 import { TaskCard } from "@/components/TaskCard";
 import { Anchor, Container, Group, Text, Title } from "@mantine/core";
@@ -18,7 +18,7 @@ export const MyTaskSection: FC<Props> = ({ username }) => {
 
   function loadTasks() {
     axios
-      .get<GetTasksResponse>("/api/task")
+      .get<GetTasksResponse>("/api/tasks")
       .then((resp) => {
         if (resp.data.ok) {
           setTasks(resp.data.tasks);

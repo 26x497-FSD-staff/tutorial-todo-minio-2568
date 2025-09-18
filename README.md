@@ -29,7 +29,7 @@ We can create a database container using the following command. We will use this
 Before running this command, we need to create the `D:\postgres-data` directory to use as `bind-mount` volume to persistently store database files.
 
 ```bash
-docker run -d --name postgresCont -p 5432:5432 -e POSTGRES_DB=mytodo -e POSTGRES_PASSWORD=12345678 -e PGDATA=/var/lib/postgresql/data/pgdata -v postgres-data:/var/lib/postgresql/data postgres
+docker run -d --name postgresCont -p 5432:5432 -e POSTGRES_DB=mytodo -e POSTGRES_PASSWORD=12345678 -e PGDATA=/var/lib/postgresql/data/pgdata -v postgres-data:/var/lib/postgresql/data postgres:17-alpine
 ```
 
 ### 2.2 Start a MinIO object storage container
@@ -39,8 +39,29 @@ Now we can create an object storage container as well. The `Todo app` uses this 
 Before running this command, we need to create the `D:\minio-data` directory to use as `bind-mount` volume to persistently store minio data.
 
 ```bash
-docker run -d -p 9000:9000 -p 9090:9090 --name minio -v D:\minio-data:/data -e "MINIO_ROOT_USER=root" -e "MINIO_ROOT_PASSWORD=12345678" quay.io/minio/minio server /data --console-address ":9090"
+docker run -d -p 9000:9000 -p 9090:9090 --name minio -v minio-data:/data -e "MINIO_ROOT_USER=root" -e "MINIO_ROOT_PASSWORD=12345678" quay.io/minio/minio server /data --console-address ":9090"
 ```
+
+Create an `alias` named `myminio` for the MinIO deployment running on `localhost`
+
+```bash
+mc alias set myminio http://localhost:9000 root 12345678
+
+Added `myminio` successfully.
+```
+
+Generate new `access/secret` key pairs for existing MinIO user
+
+```bash
+mc admin accesskey create myminio root
+
+Access Key: 8B79ZXQ51D9HHCA2A051
+Secret Key: iJ6OnizZRWvFJeEiIwNnui9Qy+QboYFDnmyt9DYp
+Expiration: NONE
+Name: 
+Description:
+```
+
 
 ### 2.3 Using Docker-compose to start database and object sotrage services
 
