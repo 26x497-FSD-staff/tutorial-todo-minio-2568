@@ -62,8 +62,7 @@ Name:
 Description:
 ```
 
-
-### 2.3 Using Docker-compose to start database and object sotrage services
+### 2.3 [Optional] Using Docker-compose to start database and object sotrage services
 
 Instead of running docker commands one-by-one to start each service separately, we can use `docker-compose` to manage everything.
 
@@ -88,6 +87,12 @@ docker compose -f ./docker/docker-compose.yml stop
 ```bash
 docker compose -f ./docker/docker-compose.yml start
 ```
+
+### Minio Document
+
+[JavaScript Client API Reference](https://docs.min.io/community/minio-object-store/developers/javascript/API.html)
+
+---
 
 ## 3. Create database for Todo app 
 
